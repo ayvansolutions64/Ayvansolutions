@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import Vision from './components/Vision';
@@ -97,6 +98,7 @@ export default function App() {
           <Footer />
         </motion.div>
       )}
+      <Analytics />
     </div>
   );
 }
