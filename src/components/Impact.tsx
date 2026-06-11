@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { cardReveal, groupReveal, itemReveal, sectionReveal, softViewport } from '../lib/motion';
 
 const stats = [
   { value: 2400, suffix: '+', label: 'Hours Saved', desc: 'Across all client operations' },
@@ -37,15 +38,21 @@ function Counter({ value, suffix }: { value: number; suffix: string }) {
 }
 
 export default function Impact() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.88, 1], [0, 1, 1, 0.18]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.84, 1], [56, 0, 0, -34]);
+
   return (
-    <section className="relative py-32 overflow-hidden">
+    <section ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_70%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          variants={itemReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -55,23 +62,26 @@ export default function Impact() {
 
         <motion.h2
           className="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light text-white leading-[0.9] mb-20"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
         >
           Measured Results
         </motion.h2>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/5">
+        <motion.div
+          className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/5"
+          variants={groupReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
+        >
           {stats.map((stat, i) => (
             <motion.div
               key={i}
               className="bg-black p-8 md:p-12 group hover:bg-white/[0.015] transition-colors duration-500"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.7, delay: i * 0.1 }}
+              variants={cardReveal}
             >
               <div className="font-serif text-[clamp(2.5rem,5vw,4rem)] text-white font-light mb-2 leading-none">
                 <Counter value={stat.value} suffix={stat.suffix} />
@@ -85,8 +95,8 @@ export default function Impact() {
               <div className="mt-6 h-px bg-white/0 group-hover:bg-white/10 transition-colors duration-500" />
             </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

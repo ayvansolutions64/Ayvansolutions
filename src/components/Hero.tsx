@@ -1,6 +1,7 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, ArrowDown } from 'lucide-react';
+import { appleEase, groupReveal, itemReveal } from '../lib/motion';
 
 const nodes = [
   { x: 15, y: 30, label: 'CRM', delay: 0 },
@@ -39,11 +40,11 @@ function WorkflowViz() {
             strokeWidth="0.3"
             initial={{ pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 1.2, delay: 0.8 + i * 0.1, ease: 'easeInOut' }}
+            transition={{ duration: 1.4, delay: 0.7 + i * 0.08, ease: appleEase }}
           />
         ))}
         {nodes.map((node, i) => (
-          <motion.g key={i} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.6 + node.delay, ease: [0.34, 1.56, 0.64, 1] }}>
+          <motion.g key={i} initial={{ opacity: 0, scale: 0.82 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.55 + node.delay, ease: appleEase }}>
             <circle
               cx={node.x}
               cy={node.y}
@@ -75,7 +76,7 @@ function WorkflowViz() {
           style={{ left: `${node.x}%`, top: `${node.y}%` }}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 1 + node.delay }}
+          transition={{ duration: 0.7, delay: 0.9 + node.delay, ease: appleEase }}
         >
           <span className={`text-[9px] tracking-widest uppercase font-sans ${node.core ? 'text-white font-medium mt-5 block' : 'text-gray-500 mt-4 block'}`}>
             {node.label}
@@ -89,27 +90,19 @@ function WorkflowViz() {
 export default function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-
-  const container = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
-  };
-  const item = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.76, 0, 0.24, 1] } },
-  };
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.58, 1], [1, 1, 0.08]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.965]);
 
   return (
     <section id="home" ref={ref} className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_50%,rgba(255,255,255,0.02)_0%,transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_50%,rgba(255,255,255,0.015)_0%,transparent_60%)]" />
 
-      <motion.div style={{ y, opacity }} className="relative z-10 max-w-7xl mx-auto w-full px-6 md:px-12 pt-28 pb-20">
+      <motion.div style={{ y, opacity, scale }} className="relative z-10 max-w-7xl mx-auto w-full px-6 md:px-12 pt-28 pb-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center min-h-[80vh]">
-          <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-8">
-            <motion.div variants={item}>
+          <motion.div variants={groupReveal} initial="hidden" animate="show" className="flex flex-col gap-8">
+            <motion.div variants={itemReveal}>
               <span className="text-xs tracking-[0.35em] uppercase text-gray-500 font-sans border border-white/10 px-3 py-1.5 inline-block">
                 Intelligent Automation Agency
               </span>
@@ -126,9 +119,9 @@ export default function Hero() {
                   <motion.span
                     key={word}
                     className="block overflow-hidden"
-                    initial={{ y: '100%' }}
-                    animate={{ y: '0%' }}
-                    transition={{ duration: 0.85, delay: 0.4 + i * 0.15, ease: [0.76, 0, 0.24, 1] }}
+                    initial={{ y: '110%', opacity: 0, filter: 'blur(10px)' }}
+                    animate={{ y: '0%', opacity: 1, filter: 'blur(0px)' }}
+                    transition={{ duration: 1.05, delay: 0.28 + i * 0.12, ease: appleEase }}
                   >
                     {word}
                   </motion.span>
@@ -137,17 +130,17 @@ export default function Hero() {
             </div>
 
             <motion.p
-              variants={item}
+              variants={itemReveal}
               className="font-serif text-[clamp(1.1rem,2vw,1.5rem)] text-gray-400 font-light italic leading-relaxed max-w-md"
             >
               Let Automation Handle the Rest.
             </motion.p>
 
-            <motion.p variants={item} className="font-sans text-sm text-gray-500 leading-relaxed max-w-md">
+            <motion.p variants={itemReveal} className="font-sans text-sm text-gray-500 leading-relaxed max-w-md">
               Ayvan Solutions builds intelligent automation systems that eliminate repetitive workflows, reduce operational bottlenecks, and help businesses focus on growth instead of routine tasks.
             </motion.p>
 
-            <motion.div variants={item} className="flex flex-col sm:flex-row gap-4 pt-2">
+            <motion.div variants={itemReveal} className="flex flex-col sm:flex-row gap-4 pt-2">
               <motion.button
                 onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}
                 className="group flex items-center justify-center gap-3 bg-white text-black px-8 py-4 text-xs tracking-[0.2em] uppercase font-medium font-sans hover:bg-gray-100 transition-colors duration-300"
@@ -173,7 +166,7 @@ export default function Hero() {
             className="relative h-[420px] lg:h-[520px] hidden lg:block"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.5, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 1.25, delay: 0.45, ease: appleEase }}
           >
             <div className="absolute inset-0 border border-white/5 bg-white/[0.01]">
               <WorkflowViz />
@@ -186,7 +179,7 @@ export default function Hero() {
           className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8 }}
+          transition={{ delay: 1.25, duration: 1, ease: appleEase }}
         >
           <span className="text-xs tracking-[0.25em] uppercase text-gray-600 font-sans">Scroll</span>
           <motion.div animate={{ y: [0, 5, 0] }} transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}>

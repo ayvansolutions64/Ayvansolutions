@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Clock, AlertCircle, TrendingUp, Zap, CheckCircle2 } from 'lucide-react';
+import { cardReveal, groupReveal, sectionReveal, softViewport } from '../lib/motion';
 
 const cards = [
   {
@@ -43,15 +44,17 @@ const cards = [
 export default function WhyAutomation() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const opacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
+  const labelOpacity = useTransform(scrollYProgress, [0, 0.12], [0, 1]);
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.86, 1], [0, 1, 1, 0.16]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.82, 1], [56, 0, 0, -34]);
 
   return (
     <section ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.015)_0%,transparent_60%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          style={{ opacity }}
+          style={{ opacity: labelOpacity }}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -60,10 +63,10 @@ export default function WhyAutomation() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-20"
         >
           <h2 className="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light text-white leading-[0.9] mb-4">
@@ -74,17 +77,20 @@ export default function WhyAutomation() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5"
+          variants={groupReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
+        >
           {cards.map((card, i) => {
             const Icon = card.icon;
             return (
               <motion.div
                 key={i}
                 className="group bg-black p-8 hover:bg-white/[0.02] transition-colors duration-500 cursor-default"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.7, delay: i * 0.1, ease: [0.76, 0, 0.24, 1] }}
+                variants={cardReveal}
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="p-2 border border-white/10 group-hover:border-white/20 transition-colors">
@@ -110,17 +116,14 @@ export default function WhyAutomation() {
 
           <motion.div
             className="md:col-span-2 bg-black p-8 flex items-center justify-center border-t border-white/5"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.5 }}
+            variants={cardReveal}
           >
             <p className="font-serif text-[clamp(1.3rem,3vw,2rem)] text-white/70 text-center font-light italic leading-relaxed">
               Time is the only asset<br />you can never earn back.
             </p>
           </motion.div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

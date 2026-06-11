@@ -1,8 +1,10 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useRef, useState } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight, Instagram, Linkedin, Globe, Mail } from 'lucide-react';
+import { appleEase, itemReveal, sectionReveal, softViewport } from '../lib/motion';
 
 export default function Contact() {
+  const ref = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -12,6 +14,9 @@ export default function Contact() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.9, 1], [0, 1, 1, 0.45]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.88, 1], [56, 0, 0, -18]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -33,14 +38,15 @@ export default function Contact() {
   ];
 
   return (
-    <section id="contact" className="relative py-32 overflow-hidden">
+    <section id="contact" ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(255,255,255,0.015)_0%,transparent_60%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          variants={itemReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -50,20 +56,20 @@ export default function Contact() {
 
         <motion.h2
           className="font-serif text-[clamp(2.5rem,7vw,6rem)] font-light text-white leading-[0.9] mb-20"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
         >
           Let's Build<br />Smarter Systems
         </motion.h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+            initial={{ opacity: 0, x: -18, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            viewport={softViewport}
+            transition={{ duration: 0.9, ease: appleEase }}
           >
             <p className="font-sans text-sm text-gray-400 leading-relaxed mb-12 max-w-sm">
               Ready to reclaim your time? Tell us about your business and we'll design an automation strategy tailored to your needs.
@@ -77,10 +83,10 @@ export default function Contact() {
                     key={i}
                     href={item.href}
                     className="flex items-center gap-4 group"
-                    initial={{ opacity: 0, x: -10 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
+                    initial={{ opacity: 0, x: -12, filter: 'blur(8px)' }}
+                    whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                    viewport={softViewport}
+                    transition={{ duration: 0.65, delay: i * 0.06, ease: appleEase }}
                   >
                     <div className="p-2 border border-white/10 group-hover:border-white/30 transition-colors">
                       <Icon size={14} className="text-gray-500 group-hover:text-white transition-colors" strokeWidth={1.5} />
@@ -96,17 +102,17 @@ export default function Contact() {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.76, 0, 0.24, 1] }}
+            initial={{ opacity: 0, x: 18, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            viewport={softViewport}
+            transition={{ duration: 0.9, delay: 0.12, ease: appleEase }}
           >
             {submitted ? (
               <motion.div
                 className="h-full flex flex-col items-center justify-center gap-6 border border-white/10 p-12 text-center"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: 0.55, ease: appleEase }}
               >
                 <div className="w-12 h-12 border border-white/20 flex items-center justify-center">
                   <ArrowRight size={18} className="text-white" />
@@ -177,7 +183,7 @@ export default function Contact() {
             )}
           </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

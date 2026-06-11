@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { X, Check } from 'lucide-react';
+import { appleEase, itemReveal, sectionReveal, softViewport } from '../lib/motion';
 
 const before = [
   'Manual Tasks',
@@ -21,6 +22,9 @@ const after = [
 export default function BeforeAfter() {
   const [active, setActive] = useState<'before' | 'after'>('before');
   const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.86, 1], [0, 1, 1, 0.16]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.82, 1], [56, 0, 0, -34]);
 
   const items = active === 'before' ? before : after;
   const isAfter = active === 'after';
@@ -29,11 +33,12 @@ export default function BeforeAfter() {
     <section ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(255,255,255,0.02)_0%,transparent_70%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          variants={itemReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -43,10 +48,10 @@ export default function BeforeAfter() {
 
         <motion.h2
           className="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light text-white leading-[0.9] mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+          variants={sectionReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
         >
           Before vs After
         </motion.h2>
@@ -72,10 +77,10 @@ export default function BeforeAfter() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={active}
-                initial={{ opacity: 0, x: active === 'after' ? 20 : -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: active === 'after' ? -20 : 20 }}
-                transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
+                initial={{ opacity: 0, x: active === 'after' ? 18 : -18, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, x: active === 'after' ? -18 : 18, filter: 'blur(10px)' }}
+                transition={{ duration: 0.55, ease: appleEase }}
                 className="space-y-4"
               >
                 {items.map((item, i) => (
@@ -88,7 +93,7 @@ export default function BeforeAfter() {
                     }`}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.07, duration: 0.4 }}
+                    transition={{ delay: i * 0.055, duration: 0.5, ease: appleEase }}
                   >
                     <div className={`p-1 ${isAfter ? 'bg-white/10' : 'bg-white/5'}`}>
                       {isAfter ? (
@@ -115,7 +120,7 @@ export default function BeforeAfter() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.65, ease: appleEase }}
                 >
                   <div className="relative w-full h-full border border-white/5 p-8 overflow-hidden">
                     <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent,transparent_30px,rgba(255,255,255,0.02)_30px,rgba(255,255,255,0.02)_31px)]" />
@@ -150,7 +155,7 @@ export default function BeforeAfter() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.65, ease: appleEase }}
                 >
                   <div className="w-full h-full border border-white/10 p-8 overflow-hidden relative">
                     <div className="absolute inset-0">
@@ -188,7 +193,7 @@ export default function BeforeAfter() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

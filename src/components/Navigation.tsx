@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 
 const navLinks = [
-  { label: 'Home', href: '#home' },
-  { label: 'Vision', href: '#vision' },
-  { label: 'Services', href: '#services' },
-  { label: 'Portfolio', href: '#portfolio' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'THE VISION', href: '#vision' },
+  { label: 'SERVICES', href: '#services' },
+  { label: 'PORTFOLIO', href: '#portfolio' },
+  { label: 'CONTACT', href: '#contact' },
 ];
 
 export default function Navigation() {

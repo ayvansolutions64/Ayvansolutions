@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { appleEase, cardReveal, groupReveal, itemReveal, sectionReveal, softViewport } from '../lib/motion';
 
 const projects = [
   {
@@ -34,16 +35,21 @@ const projects = [
 
 export default function Portfolio() {
   const [active, setActive] = useState<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.88, 1], [0, 1, 1, 0.18]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.84, 1], [56, 0, 0, -34]);
 
   return (
-    <section id="portfolio" className="relative py-32 overflow-hidden">
+    <section id="portfolio" ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center_bottom,rgba(255,255,255,0.015)_0%,transparent_70%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          variants={itemReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -54,24 +60,27 @@ export default function Portfolio() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6">
           <motion.h2
             className="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light text-white leading-[0.9]"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+            variants={sectionReveal}
+            initial="hidden"
+            whileInView="show"
+            viewport={softViewport}
           >
             Selected<br />Work
           </motion.h2>
         </div>
 
-        <div className="space-y-px">
+        <motion.div
+          className="space-y-px"
+          variants={groupReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
+        >
           {projects.map((project, i) => (
             <motion.div
               key={i}
               className="group border border-white/5 hover:border-white/15 transition-colors duration-500"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.7, delay: i * 0.12, ease: [0.76, 0, 0.24, 1] }}
+              variants={cardReveal}
             >
               <button
                 className="w-full text-left p-8 md:p-10"
@@ -105,7 +114,7 @@ export default function Portfolio() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
+                    transition={{ duration: 0.55, ease: appleEase }}
                     className="overflow-hidden"
                   >
                     <div className="px-8 md:px-10 pb-10 border-t border-white/5">
@@ -144,8 +153,8 @@ export default function Portfolio() {
               </AnimatePresence>
             </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

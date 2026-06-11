@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import { motion } from 'framer-motion';
+import { useScroll, useTransform } from 'framer-motion';
 import { Workflow, Brain, Users, Mail, Target, BarChart2, Settings, Layers } from 'lucide-react';
+import { cardReveal, groupReveal, itemReveal, sectionReveal, softViewport } from '../lib/motion';
 
 const services = [
   { icon: Workflow, title: 'Workflow Automation', desc: 'Design and deploy end-to-end automated workflows that replace manual, multi-step processes.' },
@@ -14,15 +16,21 @@ const services = [
 ];
 
 export default function Services() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
+  const sectionOpacity = useTransform(scrollYProgress, [0, 0.16, 0.86, 1], [0, 1, 1, 0.16]);
+  const sectionY = useTransform(scrollYProgress, [0, 0.22, 0.82, 1], [56, 0, 0, -34]);
+
   return (
-    <section id="services" className="relative py-32 overflow-hidden">
+    <section id="services" ref={ref} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.015)_0%,transparent_60%)]" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
+      <motion.div style={{ opacity: sectionOpacity, y: sectionY }} className="relative z-10 max-w-7xl mx-auto px-6 md:px-12">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          variants={itemReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
           className="mb-4"
         >
           <span className="text-xs tracking-[0.35em] uppercase text-gray-600 font-sans">
@@ -33,35 +41,38 @@ export default function Services() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6">
           <motion.h2
             className="font-serif text-[clamp(2.5rem,6vw,5rem)] font-light text-white leading-[0.9]"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
+            variants={sectionReveal}
+            initial="hidden"
+            whileInView="show"
+            viewport={softViewport}
           >
             What We<br />Automate
           </motion.h2>
           <motion.p
             className="font-sans text-sm text-gray-500 max-w-xs leading-relaxed"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            variants={itemReveal}
+            initial="hidden"
+            whileInView="show"
+            viewport={softViewport}
           >
             From a single workflow to a fully automated operation — we build systems that work around the clock.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/5"
+          variants={groupReveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={softViewport}
+        >
           {services.map((service, i) => {
             const Icon = service.icon;
             return (
               <motion.div
                 key={i}
                 className="group bg-black p-7 hover:bg-white/[0.025] transition-all duration-500 cursor-default relative overflow-hidden"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.6, delay: (i % 4) * 0.08, ease: [0.76, 0, 0.24, 1] }}
+                variants={cardReveal}
               >
                 <div className="absolute top-0 left-0 w-0 h-px bg-white/30 group-hover:w-full transition-all duration-500" />
 
@@ -83,8 +94,8 @@ export default function Services() {
               </motion.div>
             );
           })}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
